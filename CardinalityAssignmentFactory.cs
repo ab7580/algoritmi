@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace Sem2
 {
-    public class CardinalityAssignmentFactory
+    sealed class CardinalityAssignmentFactory
     {
-        private readonly string x0;
+        private readonly KeyList<int> x0;
         private readonly Dictionary<string, int> words2positions;
         private readonly Dictionary<int, bool> positions2bools; // is there a duo (string of length 2) on position pos
 
-        public CardinalityAssignmentFactory(string A, int k)
+        public CardinalityAssignmentFactory(string A)
         {
             //var alphabet = "abcdefghijklmnopqrstuvwxyz"[..l];
             var alphabet = A.Distinct().OrderBy(x => x).ToList();
             IEnumerable<string>? q = alphabet.Select(x => x.ToString());
-            int size = k;
+            int size = 2;
             int ix = 0;
 
             words2positions = new();
@@ -41,10 +41,10 @@ namespace Sem2
             }
 
 
-            x0 = "";
+            x0 = new();
             for (int i = 1; i <= GetSize(); i++)
             {
-                x0 += "0";
+                x0.Add(0);
             }
         }
 
@@ -53,7 +53,7 @@ namespace Sem2
             return words2positions.Count;
         }
 
-        public string GetX0()
+        public KeyList<int> GetX0()
         {
             return x0;
         }
@@ -75,20 +75,31 @@ namespace Sem2
             return words2positions[w];
         }
 
-        public static string Increment(string x, int positionW)
+        public static KeyList<int> Increment(KeyList<int> x, int positionW)
         {
-            int value = Int32.Parse(x.Substring(positionW, 1)) + 1;
-            return x[..positionW] + value.ToString() + x.Substring(positionW + 1, x.Length - positionW - 1);
+            //int value = Int32.Parse(x[positionW].ToString()) + 1;
+            //return x[..positionW] + value.ToString() + x.Substring(positionW + 1, x.Length - positionW - 1);
+            KeyList<int> newList = new();
+            for (int i=0; i< x.Count; ++i)
+            {
+                if (i == positionW)
+                {
+                    newList.Add(x[i] + 1);
+                    continue;
+                }
+                newList.Add(x[i]);
+            }
+            return newList;
         }
 
-        public int Eval(string X)
+        public int Eval(KeyList<int> X)
         {
             int eval = 0;
-            for (int i = 0; i<X.Length; i++)
+            for (int i = 0; i<X.Count; i++)
             {
                 if (positions2bools[i])
                 {
-                    eval += Int32.Parse(X[i].ToString());
+                    eval += X[i];
                 }
             }
             return eval;

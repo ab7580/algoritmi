@@ -6,35 +6,42 @@ using System.Threading.Tasks;
 
 namespace Sem2
 {
-    public static class Algorithms
+    sealed class Algorithms
     {
-        public static (List<string>, List<string>) Match(string A, string B, int k)
+        public static (List<string>, List<string>, int) Match(string A, string B)
         {
-            var caf = new CardinalityAssignmentFactory(A, k);
+            var caf = new CardinalityAssignmentFactory(A);
 
-            string solX = caf.GetX0();
+            KeyList<int> solX = caf.GetX0();
+            int solEval = 0;
 
-            (var omegaA, var SA) = Generate(A, k);
-            (var omegaB, var SB) = Generate(B, k);
+            (var omegaA, var SA) = Generate(A);
+            (var omegaB, var SB) = Generate(B);
 
-            foreach (string X in omegaA)
+            foreach (var Xpair in omegaA)
             {
-                if (omegaB.Contains(X) && caf.Eval(X) > caf.Eval(solX))
+                var X = Xpair.Key;
+                int eval = caf.Eval(X);
+                if (omegaB.ContainsKey(X) && eval > solEval)
+                {
                     solX = X;
+                    solEval = eval;
+                }
             }
 
-            return (SA[solX], SB[solX]);
+            return (SA[solX], SB[solX], solEval);
         }
 
-        public static (SortedSet<string>, Dictionary<string, List<string>>) Generate(string A, int k)
+        public static (Dictionary<KeyList<int>, bool>, Dictionary<KeyList<int>, List<string>>) Generate(string A)
         {
             int n = A.Length;
-            CardinalityAssignmentFactory caf = new CardinalityAssignmentFactory(A, k);
-            Dictionary<string, List<string>> S = new();
-            List<SortedSet<string>> omegas = new();
+            int k = 2;
+            CardinalityAssignmentFactory caf = new CardinalityAssignmentFactory(A);
+            Dictionary<KeyList<int>, List<string>> S = new();
+            List<Dictionary<KeyList<int>, bool>> omegas = new();
 
-            SortedSet<string> omega0 = new();
-            omega0.Add(caf.GetX0());
+            Dictionary<KeyList<int>, bool> omega0 = new();
+            omega0.Add(caf.GetX0(), true);
 
             omegas.Add(omega0);
 
@@ -42,19 +49,20 @@ namespace Sem2
 
             for (int i = 1; i <= n; i++)
             {
-                SortedSet<string> omegai = new();
+                Dictionary<KeyList<int>, bool> omegai = new();
                 omegas.Add(omegai);
 
                 for (int j = 1; j <= Math.Min(i, k); ++j)
                 {
                     string w = A.Substring(i - j, j);
                     int positionW = caf.GetPosition(w);
-                    foreach (string X in omegas[i - j])
+                    foreach (KeyValuePair<KeyList<int>, bool> Xpair in omegas[i - j])
                     {
-                        string tmpX = CardinalityAssignmentFactory.Increment(X, positionW);
-                        if (!omegai.Contains(tmpX))
+                        KeyList<int> X = Xpair.Key;
+                        KeyList<int> tmpX = CardinalityAssignmentFactory.Increment(X, positionW);
+                        if (!omegai.ContainsKey(tmpX))
                         {
-                            omegai.Add(tmpX);
+                            omegai.Add(tmpX, true);
                             var tmpList = new List<string>();
                             tmpList.AddRange(S[X]);
                             tmpList.Add(w);
