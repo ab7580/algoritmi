@@ -8,34 +8,35 @@ namespace Sem2
 {
     public class CardinalityAssignmentFactory
     {
-        private readonly int l;
-        private readonly int k;
         private readonly string x0;
-        private readonly Dictionary<string, int> positions;
+        private readonly Dictionary<string, int> words2positions;
+        private readonly Dictionary<int, bool> positions2bools; // is there a duo (string of length 2) on position pos
 
-        public CardinalityAssignmentFactory(int l, int k)
+        public CardinalityAssignmentFactory(string A, int k)
         {
-            this.l = l;
-            this.k = k;
-
-            var alphabet = "abcdefghijklmnopqrstuvwxyz"[..l];
+            //var alphabet = "abcdefghijklmnopqrstuvwxyz"[..l];
+            var alphabet = A.Distinct().OrderBy(x => x).ToList();
             IEnumerable<string>? q = alphabet.Select(x => x.ToString());
             int size = k;
             int ix = 0;
-            positions = new Dictionary<string, int>();
+
+            words2positions = new();
+            positions2bools = new();
 
             for (int i = 0; i < size - 1; i++)
             {
                 foreach (var item in q)
                 {
-                    positions.Add(item, ix);
+                    words2positions.Add(item, ix);
+                    positions2bools.Add(ix, item.Length == 2);
                     ++ix;
                 }
                 q = q.SelectMany(x => alphabet, (x, y) => x + y);
             }
             foreach (var item in q)
             {
-                positions.Add(item, ix);
+                words2positions.Add(item, ix);
+                positions2bools.Add(ix, item.Length == 2);
                 ++ix;
             }
 
@@ -49,7 +50,7 @@ namespace Sem2
 
         public int GetSize()
         {
-            return positions.Count;
+            return words2positions.Count;
         }
 
         public string GetX0()
@@ -71,13 +72,26 @@ namespace Sem2
             //    ca += "0";
             //}
             //return ca;
-            return positions[w];
+            return words2positions[w];
         }
 
         public static string Increment(string x, int positionW)
         {
             int value = Int32.Parse(x.Substring(positionW, 1)) + 1;
             return x[..positionW] + value.ToString() + x.Substring(positionW + 1, x.Length - positionW - 1);
+        }
+
+        public int Eval(string X)
+        {
+            int eval = 0;
+            for (int i = 0; i<X.Length; i++)
+            {
+                if (positions2bools[i])
+                {
+                    eval += Int32.Parse(X[i].ToString());
+                }
+            }
+            return eval;
         }
     }
 }
