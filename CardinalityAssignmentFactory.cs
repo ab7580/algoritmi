@@ -8,7 +8,7 @@ namespace Sem2
 {
     sealed class CardinalityAssignmentFactory
     {
-        private readonly KeyList<int> x0;
+        private readonly List<int> x0;
         private readonly Dictionary<string, int> words2positions;
         private readonly Dictionary<int, bool> positions2bools; // is there a duo (string of length 2) on position pos
 
@@ -53,7 +53,7 @@ namespace Sem2
             return words2positions.Count;
         }
 
-        public KeyList<int> GetX0()
+        public List<int> GetX0()
         {
             return x0;
         }
@@ -75,11 +75,11 @@ namespace Sem2
             return words2positions[w];
         }
 
-        public static KeyList<int> Increment(KeyList<int> x, int positionW)
+        public static List<int> Increment(List<int> x, int positionW)
         {
             //int value = Int32.Parse(x[positionW].ToString()) + 1;
             //return x[..positionW] + value.ToString() + x.Substring(positionW + 1, x.Length - positionW - 1);
-            KeyList<int> newList = new();
+            List<int> newList = new();
             for (int i=0; i< x.Count; ++i)
             {
                 if (i == positionW)
@@ -92,7 +92,7 @@ namespace Sem2
             return newList;
         }
 
-        public int Eval(KeyList<int> X)
+        public int Eval(List<int> X)
         {
             int eval = 0;
             for (int i = 0; i<X.Count; i++)
