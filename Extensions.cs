@@ -35,10 +35,10 @@ namespace Sem2
             return new string(array);
         }
 
-        public static string Hash(this List<int> list)
+        public static string ToDotString(this List<int> list)
         {
             string s = string.Join<int>(".", list);
-            return CalculateHash(s).ToString();
+            return s;
         }
         static UInt64 CalculateHash(string read)
         {

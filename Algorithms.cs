@@ -8,7 +8,7 @@ namespace Sem2
 {
     sealed class Algorithms
     {
-        public static (List<string>, List<string>, int) Match(string A, string B)
+        public static (List<string>, List<string>, int, int, int, int, int) Match(string A, string B)
         {
             var caf = new CardinalityAssignmentFactory(A);
 
@@ -22,14 +22,14 @@ namespace Sem2
             {
                 var X = Xpair.Value;
                 int eval = caf.Eval(X);
-                if (omegaB.ContainsKey(X.Hash()) && eval > solEval)
+                if (omegaB.ContainsKey(X.ToDotString()) && eval > solEval)
                 {
                     solX = X;
                     solEval = eval;
                 }
             }
 
-            return (SA[solX.Hash()], SB[solX.Hash()], solEval);
+            return (SA[solX.ToDotString()], SB[solX.ToDotString()], solEval, omegaA.Count, SA.Count, omegaB.Count, SB.Count);
         }
 
         public static (Dictionary<string, List<int>>, Dictionary<string, List<string>>) Generate(string A)
@@ -40,15 +40,14 @@ namespace Sem2
             int k = 2;
             CardinalityAssignmentFactory caf = new CardinalityAssignmentFactory(A);
             Dictionary<string, List<string>> S = new();
-            Dictionary<string, List<int>> sanity = new();
             List<Dictionary<string, List<int>>> omegas = new();
 
             Dictionary<string, List<int>> omega0 = new();
-            omega0.Add(caf.GetX0().Hash(), caf.GetX0());
+            omega0.Add(caf.GetX0().ToDotString(), caf.GetX0());
 
             omegas.Add(omega0);
 
-            S.Add(caf.GetX0().Hash(), new());
+            S.Add(caf.GetX0().ToDotString(), new());
 
             for (int i = 1; i <= n; i++)
             {
@@ -63,15 +62,14 @@ namespace Sem2
                     {
                         List<int> X = Xpair.Value;
                         List<int> tmpX = CardinalityAssignmentFactory.Increment(X, positionW);
-                        string tmpXHash = tmpX.Hash();
+                        string tmpXHash = tmpX.ToDotString();
                         if (!omegai.ContainsKey(tmpXHash))
                         {
                             omegai.Add(tmpXHash, tmpX);
                             var tmpList = new List<string>();
-                            tmpList.AddRange(S[X.Hash()]);
+                            tmpList.AddRange(S[X.ToDotString()]);
                             tmpList.Add(w);
                             S.Add(tmpXHash, tmpList);
-                            sanity.Add(tmpXHash, tmpX);
                         }
                     }
                 }
